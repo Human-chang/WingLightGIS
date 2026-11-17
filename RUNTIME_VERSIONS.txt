@@ -1,0 +1,120 @@
+# GIS 工具箱 runtime 實際安裝版本清單
+# 匯出日期：2026-11-12
+# Python：3.11.18（win32）
+# 來源：runtime/conda-meta/*.json 與 runtime/Lib/site-packages 的套件中繼資料（唯讀匯出）。
+# 用途：setup_portable_env.bat 只鎖到次版號，這份清單記錄目前測試通過的完整版本（含 build），供日後重建或比對。
+# 這是瘦身版 runtime（OpenBLAS，已清理 .lib／.pdb／doc／include）；先前的 MKL 版清單見 git 歷史中本檔的舊版。
+
+## conda 套件（96 個；格式 name=version=build  # channel）
+_python_abi3_support=1.0=hd8ed1ab_3  # conda-forge
+backports.zstd=1.8.0=py311h59ca64c_1  # conda-forge
+blosc=1.21.7=h12952c6_1  # conda-forge
+branca=0.8.2=pyhd8ed1ab_0  # conda-forge
+brotli-python=1.2.1=py311h7862a2f_0  # conda-forge
+bzip2=1.0.8=h0ad9c76_10  # conda-forge
+ca-certificates=2026.10.23=h4c7d964_0  # conda-forge
+certifi=2026.10.23=pyhd8ed1ab_3  # conda-forge
+charset-normalizer=3.5.2=h308a848_0  # conda-forge
+cpython=3.11.18=py311hd8ed1ab_0  # conda-forge
+et_xmlfile=2.0.0=pyhd8ed1ab_1  # conda-forge
+folium=0.20.0=pyhd8ed1ab_0  # conda-forge
+freexl=2.0.0=h037be62_3  # conda-forge
+gdal=3.13.3=np2py311h0d8e033_10  # conda-forge
+geos=3.15.0=h5112557_1  # conda-forge
+h2=4.4.1=pyhcf101f3_0  # conda-forge
+hpack=4.2.0=pyhd8ed1ab_0  # conda-forge
+hyperframe=6.1.0=pyhd8ed1ab_0  # conda-forge
+icu=78.3=h5112557_2  # conda-forge
+idna=3.20=pyh5ded981_0  # conda-forge
+jinja2=3.1.6=pyhcf101f3_1  # conda-forge
+krb5=1.22.2=h719d79b_2  # conda-forge
+lcms2=2.20=hf2c6c5f_0  # conda-forge
+lerc=4.3.0=hd936e49_0  # conda-forge
+libarchive=3.8.11=gpl_h8fdc8af_100  # conda-forge
+libblas=3.11.0=12_h0adab6e_openblas  # conda-forge
+libbrotlicommon=1.2.1=hf02afa3_0  # conda-forge
+libbrotlidec=1.2.1=h84f9c24_0  # conda-forge
+libbrotlienc=1.2.1=he2a975b_0  # conda-forge
+libcblas=3.11.0=12_h2a8eebe_openblas  # conda-forge
+libcurl=8.23.0=hdb0ef4a_0  # conda-forge
+libdeflate=1.26=h1a1d4e4_0  # conda-forge
+libexpat=2.9.0=hac47afa_0  # conda-forge
+libffi=3.7.0=h3d046cb_1  # conda-forge
+libfreetype=2.14.3=h57928b3_2  # conda-forge
+libfreetype6=2.14.3=hdbac1cb_2  # conda-forge
+libgdal-core=3.13.3=h1fd72a6_10  # conda-forge
+libhwy=1.4.0=h2419aca_2  # conda-forge
+libiconv=1.18=hc1393d2_3  # conda-forge
+libjpeg-turbo=3.2.1=hfd05255_0  # conda-forge
+libjxl=0.12.0=h932607e_4  # conda-forge
+libkml=1.3.0=h68a222c_1023  # conda-forge
+liblapack=3.11.0=12_hd232482_openblas  # conda-forge
+liblzma=5.8.3=hfd05255_1  # conda-forge
+libopenblas=0.3.34=pthreads_h952cde7_2  # conda-forge
+libpng=1.6.59=hdc8cecf_0  # conda-forge
+libpsl=0.23.1=h9b16d47_1  # conda-forge
+libpython=3.11.18=hfb4101e_0_cpython  # conda-forge
+librttopo=1.1.0=hece530f_23  # conda-forge
+libspatialite=5.1.0=gpl_he20d0f2_123  # conda-forge
+libsqlite=3.54.1=hf5d6505_101  # conda-forge
+libssh2=1.11.1=h734d217_1  # conda-forge
+libtiff=4.7.2=hef6d50c_2  # conda-forge
+libwebp-base=1.6.0=h4d5522a_1  # conda-forge
+libxml2=2.15.4=he095d88_1  # conda-forge
+libxml2-16=2.15.4=h3cfd58e_1  # conda-forge
+libxml2-devel=2.15.4=he095d88_1  # conda-forge
+libzlib=1.3.2=hfd05255_3  # conda-forge
+lz4-c=1.10.0=h6a83c73_2  # conda-forge
+lzo=2.10=h6a83c73_1003  # conda-forge
+markupsafe=3.0.4=py311h5b24874_4  # conda-forge
+minizip=4.2.2=hdc83b33_1  # conda-forge
+muparser=2.3.5=h5112557_1  # conda-forge
+numpy=2.4.6=py311h65cb7f3_0  # conda-forge
+openjpeg=2.5.4=h90fa87c_2  # conda-forge
+openpyxl=3.1.5=py311h4d8bf61_4  # conda-forge
+openssl=3.6.5=hf411b9b_0  # conda-forge
+packaging=26.3=pyhc364b38_0  # conda-forge
+pcre2=10.47=h8466c1e_1  # conda-forge
+pillow=13.0.0=py311h36f029a_0  # conda-forge
+pip=26.2.2=pyh8b19718_2  # conda-forge
+proj=9.9.0=hd30e2cd_1  # conda-forge
+pysocks=1.7.1=pyh09c184e_7  # conda-forge
+python=3.11.18=hb12b558_0_cpython  # conda-forge
+python-gil=3.11.18=hd8ed1ab_0  # conda-forge
+python_abi=3.11=9_cp311  # conda-forge
+requests=2.34.2=pyhcf101f3_0  # conda-forge
+setuptools=84.2.1=pyhe730653_0  # conda-forge
+snappy=1.3.1=h7fa0ca8_0  # conda-forge
+sqlite=3.54.1=hdb435a2_101  # conda-forge
+tk=8.6.13=h967ab96_4  # conda-forge
+tzdata=2026e=h5d301ff_0  # conda-forge
+ucrt=10.0.26100.0=h57928b3_0  # conda-forge
+uriparser=0.9.8=h5a68840_0  # conda-forge
+urllib3=2.8.0=pyhd8ed1ab_0  # conda-forge
+vc=14.5=hda273ae_43  # conda-forge
+vc14_runtime=14.51.36247=h072b54c_43  # conda-forge
+vcomp14=14.51.36247=h1c3f1cb_43  # conda-forge
+wheel=0.48.0=pyhd8ed1ab_0  # conda-forge
+whitebox_tools=2.4.0=py311hf51aa87_4  # conda-forge
+win_inet_pton=1.1.0=pyh7428d3b_8  # conda-forge
+xerces-c=3.3.0=hac47afa_3  # conda-forge
+xyzservices=2026.9.1=pyhd8ed1ab_0  # conda-forge
+zlib=1.3.2=hfd05255_3  # conda-forge
+zlib-ng=2.3.3=h0261ad2_1  # conda-forge
+zstd=1.5.7=h534d264_7  # conda-forge
+
+## pip 安裝的套件（3 個；格式 name==version；INSTALLER 記錄為 pip 者）
+customtkinter==6.0.0
+darkdetect==0.8.0
+tkinterdnd2==0.7.0
+
+## site-packages 內沒有 INSTALLER 記錄的套件（隨上面的 conda 套件裝入，版本以 Python 中繼資料為準）
+# GDAL==3.13.3
+# setuptools==84.2.1
+# wheel==0.48.0
+# whitebox_tools==0.8.0.dev0
+
+## conda-meta/history 記錄的建立指令與指定規格
+# ==> 2026-11-12 14:25:34 <==
+# cmd: micromamba.exe create -p .\runtime -c conda-forge --yes python=3.11 gdal=3.13 whitebox_tools=2.4 numpy=2.4 openpyxl=3.1 folium=0.20 pillow=13.0 libblas=*=*openblas pip
+# update specs: ["python=3.11", "gdal=3.13", "whitebox_tools=2.4", "numpy=2.4", "openpyxl=3.1", "folium=0.20", "pillow=13.0", "libblas[build=\"*openblas\"]", "pip"]

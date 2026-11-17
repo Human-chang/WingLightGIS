@@ -1,0 +1,20 @@
+# 一律不做換行轉換，所有檔案以原始位元組進出版本庫。
+# 兩支 .bat 為 CP950 + CRLF，換行或編碼被改動後 cmd.exe 會誤判指令。
+* -text
+*.bat -text -diff
+
+# git archive 打包綠色免安裝版時排除開發與測試檔案
+# 注意：setup_portable_env.bat、RUNTIME_VERSIONS.txt 與 launcher/ 依規範保留於發佈包中
+.gitignore export-ignore
+.gitattributes export-ignore
+.github export-ignore
+.github/** export-ignore
+ui/lab export-ignore
+ui/lab/** export-ignore
+tests export-ignore
+tests/** export-ignore
+tools export-ignore
+tools/** export-ignore
+docs export-ignore
+docs/** export-ignore
+打包綠色免安裝版.bat export-ignore

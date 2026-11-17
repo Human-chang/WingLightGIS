@@ -1,0 +1,28 @@
+# 可攜式沙盒執行環境（約 1.1 GB，由 setup_portable_env.bat 重建）
+runtime/
+micromamba.exe
+
+# Python 位元組碼快取
+__pycache__/
+*.pyc
+
+# 執行期暫存與輸出
+workspace_temp/
+outputs/
+bin/
+
+# 編輯器與作業系統雜項
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# 個人設定檔 (有使用者的資料夾路徑，不提交)
+config/WingLightGIS.json
+*.log
+
+# 啟動器由 launcher/build_launcher.bat 產生，不提交
+WingLightGIS.exe
+
+# 本地打包輸出目錄
+dist/

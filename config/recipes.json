@@ -1,0 +1,58 @@
+{
+  "default": {
+    "name": "標準工程邊界裁切 (TWD97 5m DEM)",
+    "description": "適用一般土木、水利工程邊界裁切，預設輸出 TWD97 (EPSG:3826)，DEM 降為 5m 並建立航照金字塔",
+    "source_crs": "EPSG:3826",
+    "target_crs": "EPSG:3826",
+    "buffer_distance": 0.0,
+    "dem_resolution": 5.0,
+    "dem_resampling": "bilinear",
+    "generate_pyramids": true,
+    "export_cad_bg": true,
+    "export_kmz": true,
+    "contour_interval": 5.0,
+    "extra_options": {}
+  },
+  "water_conservation": {
+    "name": "水土保持計畫分析配方 (外推 20m 餘裕 + 2m DEM)",
+    "description": "適用山坡地開發與水保申報，工區邊界外推 20m 餘裕，DEM 保持 2m 高精度",
+    "source_crs": "EPSG:3826",
+    "target_crs": "EPSG:3826",
+    "buffer_distance": 20.0,
+    "dem_resolution": 2.0,
+    "dem_resampling": "bilinear",
+    "generate_pyramids": true,
+    "export_cad_bg": true,
+    "export_kmz": true,
+    "contour_interval": 2.0,
+    "extra_options": {}
+  },
+  "twd67_legacy_conversion": {
+    "name": "舊地籍 TWD67 七參數平移至 TWD97",
+    "description": "適用早期地籍圖或航測地形圖，強制啟用臺灣七參數精準平移 850 公尺基準面偏移",
+    "source_crs": "TWD67_121",
+    "target_crs": "EPSG:3826",
+    "buffer_distance": 0.0,
+    "dem_resolution": 5.0,
+    "dem_resampling": "bilinear",
+    "generate_pyramids": true,
+    "export_cad_bg": true,
+    "export_kmz": false,
+    "contour_interval": 5.0,
+    "extra_options": {}
+  },
+  "cad_road_project": {
+    "name": "道路線型工程配方 (外推 15m 路權框 + CAD底圖)",
+    "description": "依據道路中心線外推 15m 作為路權範圍，產出 5m DEM、等高線與 AutoCAD 對位底圖",
+    "source_crs": "EPSG:3826",
+    "target_crs": "EPSG:3826",
+    "buffer_distance": 15.0,
+    "dem_resolution": 5.0,
+    "dem_resampling": "bilinear",
+    "generate_pyramids": true,
+    "export_cad_bg": true,
+    "export_kmz": true,
+    "contour_interval": 5.0,
+    "extra_options": {}
+  }
+}

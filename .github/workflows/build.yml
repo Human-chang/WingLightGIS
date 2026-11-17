@@ -1,0 +1,179 @@
+name: Build and Release WingLightGIS Portable
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+
+    steps:
+      - name: 1. Checkout Source Code (檢出公開原始碼)
+        uses: actions/checkout@v4
+
+      - name: 2. Check Version Matches Tag (檢查版本號與標籤一致)
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path core\__init__.py -Pattern '^__version__\s*(?::[^=]+)?=\s*"([^"]+)"').Matches[0].Groups[1].Value
+          if ("v$v" -ne $env:GITHUB_REF_NAME) {
+            throw "core/__init__.py 版本為 $v，但標籤為 $env:GITHUB_REF_NAME"
+          }
+          Write-Host "Version check passed: $v == $env:GITHUB_REF_NAME"
+
+      - name: 3. Build Isolated Runtime via Micromamba (建立獨立沙盒 runtime)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force -Path "bin", "workspace_temp", "config" | Out-Null
+          $tarPath = "workspace_temp\micromamba.tar.bz2"
+          Invoke-WebRequest -Uri "https://micro.mamba.pm/api/micromamba/win-64/latest" -OutFile $tarPath
+          $ErrorActionPreference = "Continue"
+          tar.exe -xf $tarPath -C . Library/bin/micromamba.exe 2>$null
+          $ErrorActionPreference = "Stop"
+          if (Test-Path "Library\bin\micromamba.exe") {
+            Move-Item "Library\bin\micromamba.exe" "bin\micromamba.exe" -Force
+            Remove-Item -Recurse -Force "Library" -ErrorAction SilentlyContinue
+          } else {
+            tar.exe -xf $tarPath -C . bin/micromamba.exe
+          }
+          Remove-Item $tarPath -ErrorAction SilentlyContinue
+
+          & ".\bin\micromamba.exe" create -p ".\runtime" -c conda-forge --yes `
+            "python=3.11" `
+            "gdal=3.13" `
+            "whitebox_tools=2.4" `
+            "numpy=2.4" `
+            "openpyxl=3.1" `
+            "folium=0.20" `
+            "pillow=13.0" `
+            "libblas=*=*openblas" `
+            "pip"
+          if ($LASTEXITCODE -ne 0) { throw "micromamba create failed" }
+
+          & ".\runtime\python.exe" -m pip install customtkinter==6.0.0 tkinterdnd2==0.7.0 darkdetect==0.8.0 --no-warn-script-location
+          if ($LASTEXITCODE -ne 0) { throw "pip install UI packages failed" }
+
+      - name: 4. Collect Licenses & Slim Runtime (先保留授權檔再瘦身 runtime)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          # 瘦身前先把 runtime 內的第三方授權檔收集到暫存區，以免 doc 被刪掉
+          New-Item -ItemType Directory -Force -Path "dist\stage_lic" | Out-Null
+          & ".\runtime\python.exe" -B ".\tools\collect_licenses.py" "dist\stage_lic"
+          if ($LASTEXITCODE -ne 0) { throw "collect_licenses.py failed" }
+
+          Get-ChildItem -Path ".\runtime\Library\lib" -Filter "*.lib" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+          Get-ChildItem -Path ".\runtime" -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+          foreach ($dir in @(
+            "runtime\Library\share\doc",
+            "runtime\Library\share\man",
+            "runtime\Library\share\bash-completion",
+            "runtime\Library\include",
+            "runtime\include"
+          )) {
+            if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }
+          }
+
+      - name: 5. Run Unit Tests (執行單元測試)
+        shell: pwsh
+        run: |
+          $longTemp = & ".\runtime\python.exe" -B -c "import os, pathlib; print(pathlib.Path(os.environ['TEMP']).resolve())"
+          $env:TEMP = $longTemp
+          $env:TMP = $longTemp
+          Write-Host "Expanded TEMP/TMP to: $env:TEMP"
+          & ".\runtime\python.exe" -m unittest discover -s tests -p "test_*.py" -v
+          if ($LASTEXITCODE -ne 0) { throw "Unit tests failed" }
+
+      - name: 6. Stage Portable Folder via git archive (組裝乾淨發佈資料夾)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $stageDir = "dist\WingLightGIS_綠色免安裝版"
+          Remove-Item -Recurse -Force $stageDir -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $stageDir | Out-Null
+
+          git archive --format=tar -o dist\stage_src.tar HEAD
+          if ($LASTEXITCODE -ne 0) { throw "git archive failed" }
+          $env:WL_STAGE_DIR = $stageDir
+          & ".\runtime\python.exe" -B -c "import os, tarfile; t=tarfile.open('dist/stage_src.tar'); t.extractall(os.environ['WL_STAGE_DIR'], filter='data'); t.close()"
+          if ($LASTEXITCODE -ne 0) { throw "extract git archive failed" }
+          Remove-Item -Force dist\stage_src.tar -ErrorAction SilentlyContinue
+
+          Remove-Item -Force "$stageDir\config\WingLightGIS.json" -ErrorAction SilentlyContinue
+          Copy-Item "dist\stage_lic\LICENSE.txt" "$stageDir\LICENSE.txt" -Force
+          Copy-Item "dist\stage_lic\第三方授權" "$stageDir\第三方授權" -Recurse -Force
+          Remove-Item -Force "$stageDir\LICENSE" -ErrorAction SilentlyContinue
+
+          robocopy "runtime" "$stageDir\runtime" /E /NFL /NDL /NJH /NJS /NC /NS /XD __pycache__ include doc man bash-completion /XF *.pdb *.lib *.pyc
+          if ($LASTEXITCODE -ge 8) { throw "robocopy runtime failed ($LASTEXITCODE)" }
+          $global:LASTEXITCODE = 0
+
+      - name: 7. Compile C# Splash Launcher in PowerShell (編譯 WingLightGIS.exe 啟動器)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $stageDir = (Resolve-Path "dist\WingLightGIS_綠色免安裝版").Path
+          $csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          & $csc /nologo /target:winexe /optimize+ /codepage:65001 `
+            /win32icon:"$stageDir\assets\app_icon.ico" `
+            /win32manifest:"$stageDir\launcher\WingLightGIS.manifest" `
+            /reference:System.Windows.Forms.dll `
+            /out:"$stageDir\WingLightGIS.exe" `
+            "$stageDir\launcher\WingLightGIS.cs"
+          if ($LASTEXITCODE -ne 0) { throw "csc.exe failed" }
+
+      - name: 8. Run Self-Test on Packaged Folder (對發佈資料夾執行自我測試)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $stageDir = (Resolve-Path "dist\WingLightGIS_綠色免安裝版").Path
+          $longTemp = & "$stageDir\runtime\python.exe" -B -c "import os, pathlib; print(pathlib.Path(os.environ['TEMP']).resolve())"
+          $env:TEMP = $longTemp
+          $env:TMP = $longTemp
+          $reportPath = Join-Path (Resolve-Path "dist").Path "selftest_report.json"
+          & "$stageDir\runtime\python.exe" -B "$stageDir\main.py" --self-test "$reportPath"
+          $code = $LASTEXITCODE
+          Get-Content $reportPath -Encoding utf8
+          if ($code -ne 0) { throw "Self-test failed with exit code $code" }
+          Get-ChildItem -Path $stageDir -Directory -Filter "__pycache__" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+          Remove-Item -Recurse -Force "$stageDir\workspace_temp" -ErrorAction SilentlyContinue
+
+      - name: 9. Create Portable ZIP Archive (建立綠色免安裝 ZIP 壓縮包)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = (Select-String -Path core\__init__.py -Pattern '^__version__\s*(?::[^=]+)?=\s*"([^"]+)"').Matches[0].Groups[1].Value
+          $tagName = if ($env:GITHUB_REF_NAME -and $env:GITHUB_REF_NAME.StartsWith("v")) { $env:GITHUB_REF_NAME } else { "v$version" }
+          $stageDir = (Resolve-Path "dist\WingLightGIS_綠色免安裝版").Path
+          $zipPath = Join-Path (Resolve-Path "dist").Path "WingLightGIS-$tagName.zip"
+          Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($stageDir, $zipPath, [System.IO.Compression.CompressionLevel]::Optimal, $true)
+          $sizeMB = (Get-Item $zipPath).Length / 1MB
+          Write-Host ("Created {0} ({1:N1} MB)" -f $zipPath, $sizeMB)
+
+      - name: 10. Upload Build Artifact (上傳建置成品)
+        uses: actions/upload-artifact@v4
+        with:
+          name: WingLightGIS-Portable
+          path: |
+            dist/WingLightGIS-*.zip
+            dist/selftest_report.json
+          retention-days: 14
+
+      - name: 11. Publish GitHub Release (推送標籤時發佈 Release)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: WingLightGIS ${{ github.ref_name }}
+          files: dist/WingLightGIS-*.zip
